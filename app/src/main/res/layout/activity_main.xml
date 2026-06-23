@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="#F5F7FA" android:fillViewport="true"
+    android:clipToPadding="false" android:overScrollMode="always">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="16dp" android:paddingBottom="32dp">
+
+        <!-- Header -->
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="Cài đặt hệ thống" android:textSize="20sp" android:textStyle="bold"
+            android:textColor="#1565C0" android:layout_marginBottom="4dp"/>
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="v4.0 — Hệ thống" android:textSize="12sp"
+            android:textColor="#90A4AE" android:layout_marginBottom="16dp"/>
+
+        <!-- Group + Reply -->
+        <androidx.cardview.widget.CardView android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginBottom="12dp"
+            app:cardCornerRadius="14dp" app:cardElevation="1dp" app:cardBackgroundColor="#FFFFFF">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="NHÓM CHAT" android:textSize="11sp" android:textColor="#78909C"
+                    android:textStyle="bold" android:layout_marginBottom="6dp"/>
+                <EditText android:id="@+id/et_group_name" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:minHeight="@dimen/input_min_height"
+                    android:hint="Tên nhóm (VD: Test giao đơn)"
+                    android:inputType="text" android:background="@drawable/bg_field"
+                    android:paddingHorizontal="12dp" android:textSize="14sp"/>
+                <View android:layout_width="match_parent" android:layout_height="1dp"
+                    android:background="#F0F0F0" android:layout_marginVertical="12dp"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="NỘI DUNG TỰ REPLY" android:textSize="11sp" android:textColor="#78909C"
+                    android:textStyle="bold" android:layout_marginBottom="6dp"/>
+                <EditText android:id="@+id/et_reply_text" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:minHeight="@dimen/input_min_height"
+                    android:hint="VD: nhận"
+                    android:inputType="text" android:background="@drawable/bg_field"
+                    android:paddingHorizontal="12dp" android:textSize="14sp"/>
+                <View android:layout_width="match_parent" android:layout_height="1dp"
+                    android:background="#F0F0F0" android:layout_marginVertical="12dp"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="TÊN MESSENGER CỦA BẠN" android:textSize="11sp"
+                    android:textColor="#78909C" android:textStyle="bold"
+                    android:layout_marginBottom="4dp"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="(bot dùng để không reply vào tin mình — nhập chính xác tên Facebook của bạn)"
+                    android:textSize="11sp" android:textColor="#B0BEC5"
+                    android:layout_marginBottom="6dp"/>
+                <EditText android:id="@+id/et_my_name"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:minHeight="@dimen/input_min_height"
+                    android:hint="VD: An" android:inputType="textPersonName"
+                    android:background="@drawable/bg_field"
+                    android:paddingHorizontal="12dp" android:textSize="14sp"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Allowed Senders -->
+        <androidx.cardview.widget.CardView android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginBottom="12dp"
+            app:cardCornerRadius="14dp" app:cardElevation="1dp" app:cardBackgroundColor="#FFFFFF">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="CHỈ REPLY TỪ" android:textSize="11sp" android:textColor="#78909C"
+                    android:textStyle="bold" android:layout_marginBottom="4dp"/>
+                <TextView android:id="@+id/tv_sender_hint" android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="(để trống = reply tất cả mọi người)"
+                    android:textSize="12sp" android:textColor="#B0BEC5" android:layout_marginBottom="8dp"/>
+                <androidx.recyclerview.widget.RecyclerView android:id="@+id/rv_senders"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"/>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <EditText android:id="@+id/et_new_sender" android:layout_width="0dp"
+                        android:layout_height="wrap_content" android:minHeight="44dp"
+                        android:layout_weight="1"
+                        android:hint="VD: Jerry Nguyễn" android:inputType="textPersonName"
+                        android:background="@drawable/bg_field" android:paddingHorizontal="12dp"
+                        android:textSize="13sp"/>
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_add_sender"
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:minHeight="44dp" android:layout_marginStart="8dp" android:text="Thêm"
+                        android:textSize="13sp" app:cornerRadius="10dp"
+                        app:backgroundTint="#1565C0"/>
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Keyword Sets -->
+        <androidx.cardview.widget.CardView android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginBottom="12dp"
+            app:cardCornerRadius="14dp" app:cardElevation="1dp" app:cardBackgroundColor="#FFFFFF">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:padding="16dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:gravity="center_vertical"
+                    android:layout_marginBottom="10dp">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                        android:layout_weight="1" android:text="BỘ KEYWORD"
+                        android:textSize="11sp" android:textColor="#78909C" android:textStyle="bold"/>
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_add_set"
+                        android:layout_width="wrap_content" android:layout_height="36dp"
+                        android:text="+ Tạo bộ" android:textSize="12sp"
+                        app:cornerRadius="8dp" app:backgroundTint="#E3F2FD"
+                        android:textColor="#1565C0"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+                </LinearLayout>
+                <androidx.recyclerview.widget.RecyclerView android:id="@+id/rv_sets"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Status -->
+        <androidx.cardview.widget.CardView android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:layout_marginBottom="16dp"
+            app:cardCornerRadius="14dp" app:cardElevation="1dp" app:cardBackgroundColor="#FFFFFF">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="TRẠNG THÁI" android:textSize="11sp" android:textColor="#78909C"
+                    android:textStyle="bold" android:layout_marginBottom="10dp"/>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:layout_marginBottom="6dp"
+                    android:gravity="center_vertical">
+                    <TextView android:layout_width="wrap_content" android:minWidth="@dimen/status_label_min_width"
+                        android:layout_height="wrap_content" android:layout_marginEnd="12dp"
+                        android:text="Bot" android:textSize="13sp" android:textColor="#90A4AE"/>
+                    <TextView android:id="@+id/tv_status" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="🔴 Stopped"
+                        android:textSize="13sp" android:textStyle="bold"/>
+                </LinearLayout>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:layout_marginBottom="4dp"
+                    android:gravity="center_vertical">
+                    <TextView android:layout_width="wrap_content" android:minWidth="@dimen/status_label_min_width"
+                        android:layout_height="wrap_content" android:layout_marginEnd="12dp"
+                        android:text="State" android:textSize="13sp" android:textColor="#90A4AE"/>
+                    <TextView android:id="@+id/tv_state" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="IDLE" android:textSize="13sp"/>
+                </LinearLayout>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:layout_marginBottom="4dp"
+                    android:gravity="center_vertical">
+                    <TextView android:layout_width="wrap_content" android:minWidth="@dimen/status_label_min_width"
+                        android:layout_height="wrap_content" android:layout_marginEnd="12dp"
+                        android:text="Đơn cuối" android:textSize="13sp" android:textColor="#90A4AE"/>
+                    <TextView android:id="@+id/tv_last_order" android:layout_width="0dp"
+                        android:layout_height="wrap_content" android:layout_weight="1"
+                        android:text="—" android:textSize="13sp" android:ellipsize="end"
+                        android:maxLines="1"/>
+                </LinearLayout>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:gravity="center_vertical">
+                    <TextView android:layout_width="wrap_content" android:minWidth="@dimen/status_label_min_width"
+                        android:layout_height="wrap_content" android:layout_marginEnd="12dp"
+                        android:text="Latency" android:textSize="13sp" android:textColor="#90A4AE"/>
+                    <TextView android:id="@+id/tv_latency" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:text="—" android:textSize="13sp"
+                        android:textColor="#43A047"/>
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Buttons -->
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginBottom="10dp">
+            <com.google.android.material.button.MaterialButton android:id="@+id/btn_start"
+                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                android:minHeight="@dimen/btn_primary_min_height" android:minWidth="0dp"
+                android:layout_marginEnd="6dp" android:text="▶  START" android:textStyle="bold"
+                android:textSize="15sp" app:cornerRadius="12dp" app:backgroundTint="#1565C0"/>
+            <com.google.android.material.button.MaterialButton android:id="@+id/btn_stop"
+                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                android:minHeight="@dimen/btn_primary_min_height" android:minWidth="0dp"
+                android:layout_marginStart="6dp" android:text="⏹  STOP" android:textStyle="bold"
+                android:textSize="15sp" app:cornerRadius="12dp" app:backgroundTint="#E53935"/>
+        </LinearLayout>
+        <com.google.android.material.button.MaterialButton android:id="@+id/btn_logs"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:minHeight="@dimen/btn_secondary_height"
+            android:text="📋  Xem Logs" android:textSize="13sp" app:cornerRadius="12dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_marginBottom="16dp"/>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

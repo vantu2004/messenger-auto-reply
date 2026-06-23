@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:overScrollMode="always" android:fillViewport="true">
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="20dp">
+
+        <!-- Tên bộ -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="TÊN BỘ" android:textSize="11sp" android:textColor="#78909C"
+            android:textStyle="bold" android:layout_marginBottom="6dp"/>
+        <EditText android:id="@+id/et_set_name" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:minHeight="@dimen/input_min_height"
+            android:inputType="text"
+            android:background="@drawable/bg_field" android:paddingHorizontal="12dp"
+            android:textSize="14sp" android:layout_marginBottom="16dp"/>
+
+        <!-- Keywords kích hoạt -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="KEYWORD KÍCH HOẠT" android:textSize="11sp" android:textColor="#1565C0"
+            android:textStyle="bold" android:layout_marginBottom="6dp"/>
+
+        <androidx.recyclerview.widget.RecyclerView android:id="@+id/rv_kw"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"/>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:layout_marginBottom="16dp">
+            <EditText android:id="@+id/et_add_kw" android:layout_width="0dp"
+                android:layout_height="wrap_content" android:minHeight="44dp"
+                android:layout_weight="1"
+                android:hint="Thêm keyword..." android:inputType="text"
+                android:background="@drawable/bg_field" android:paddingHorizontal="10dp"
+                android:textSize="13sp"/>
+            <com.google.android.material.button.MaterialButton android:id="@+id/btn_add_kw"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:minHeight="44dp" android:layout_marginStart="8dp" android:text="+" android:textSize="18sp"
+                app:cornerRadius="10dp" app:backgroundTint="#1565C0"
+                xmlns:app="http://schemas.android.com/apk/res-auto"/>
+        </LinearLayout>
+
+        <!-- Divider -->
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:background="#ECEFF1" android:layout_marginBottom="16dp"/>
+
+        <!-- Excludes -->
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="KEYWORD LOẠI TRỪ (không reply nếu chứa)" android:textSize="11sp"
+            android:textColor="#E53935" android:textStyle="bold" android:layout_marginBottom="6dp"/>
+
+        <androidx.recyclerview.widget.RecyclerView android:id="@+id/rv_ex"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"/>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <EditText android:id="@+id/et_add_ex" android:layout_width="0dp"
+                android:layout_height="wrap_content" android:minHeight="44dp"
+                android:layout_weight="1"
+                android:hint="VD: hủy, test, fake..." android:inputType="text"
+                android:background="@drawable/bg_field" android:paddingHorizontal="10dp"
+                android:textSize="13sp"/>
+            <com.google.android.material.button.MaterialButton android:id="@+id/btn_add_ex"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:minHeight="44dp" android:layout_marginStart="8dp" android:text="+" android:textSize="18sp"
+                app:cornerRadius="10dp" app:backgroundTint="#E53935"
+                xmlns:app="http://schemas.android.com/apk/res-auto"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

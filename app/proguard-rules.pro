@@ -1,0 +1,2 @@
+-keep class com.autoreply.messenger.** { *; }
+-keepattributes *Annotation*
