@@ -11,7 +11,7 @@ public class Config {
     public String activeSetId = "";
     public boolean enabled = false;
     public boolean debugMode = false;
-    public int gestureDuration = 60;
+    public int gestureDuration = 150;
     public int duplicateCacheSize = 50;
     // Tên Messenger của người dùng app này — để bot không reply vào tin của chính mình
     // Nếu để trống, bot sẽ tự detect từ bubble bên phải

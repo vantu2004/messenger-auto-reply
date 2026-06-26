@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="wrap_content"
-    android:overScrollMode="always" android:fillViewport="true">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/scroll_root"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:overScrollMode="always" android:fillViewport="false"
+    android:fadeScrollbars="false" android:scrollbars="vertical">
 
     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
         android:orientation="vertical" android:padding="20dp">
@@ -21,9 +24,12 @@
             android:text="KEYWORD KÍCH HOẠT" android:textSize="11sp" android:textColor="#1565C0"
             android:textStyle="bold" android:layout_marginBottom="6dp"/>
 
-        <androidx.recyclerview.widget.RecyclerView android:id="@+id/rv_kw"
+        <!-- ★ FIX: Dùng FlexboxLayout thay RecyclerView — tránh bug measure trong NestedScrollView -->
+        <com.google.android.flexbox.FlexboxLayout android:id="@+id/flex_kw"
             android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"/>
+            android:layout_marginBottom="8dp"
+            app:flexDirection="row"
+            app:flexWrap="wrap"/>
 
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
             android:orientation="horizontal" android:layout_marginBottom="16dp">
@@ -36,8 +42,7 @@
             <com.google.android.material.button.MaterialButton android:id="@+id/btn_add_kw"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:minHeight="44dp" android:layout_marginStart="8dp" android:text="+" android:textSize="18sp"
-                app:cornerRadius="10dp" app:backgroundTint="#1565C0"
-                xmlns:app="http://schemas.android.com/apk/res-auto"/>
+                app:cornerRadius="10dp" app:backgroundTint="#1565C0"/>
         </LinearLayout>
 
         <!-- Divider -->
@@ -49,9 +54,12 @@
             android:text="KEYWORD LOẠI TRỪ (không reply nếu chứa)" android:textSize="11sp"
             android:textColor="#E53935" android:textStyle="bold" android:layout_marginBottom="6dp"/>
 
-        <androidx.recyclerview.widget.RecyclerView android:id="@+id/rv_ex"
+        <!-- ★ FIX: Dùng FlexboxLayout thay RecyclerView -->
+        <com.google.android.flexbox.FlexboxLayout android:id="@+id/flex_ex"
             android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"/>
+            android:layout_marginBottom="8dp"
+            app:flexDirection="row"
+            app:flexWrap="wrap"/>
 
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
             android:orientation="horizontal">
@@ -64,8 +72,7 @@
             <com.google.android.material.button.MaterialButton android:id="@+id/btn_add_ex"
                 android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:minHeight="44dp" android:layout_marginStart="8dp" android:text="+" android:textSize="18sp"
-                app:cornerRadius="10dp" app:backgroundTint="#E53935"
-                xmlns:app="http://schemas.android.com/apk/res-auto"/>
+                app:cornerRadius="10dp" app:backgroundTint="#E53935"/>
         </LinearLayout>
 
     </LinearLayout>

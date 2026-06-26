@@ -48,23 +48,41 @@ public class ReplyEngine {
 
     private void doSwipe(int attempt) {
         setState(State.REPLYING);
+
+        // ★ FIX: Re-fetch fresh bounds trước mỗi lần retry
+        // Vì bubble có thể đã shift position khi có tin mới
+        if (attempt > 0) {
+            AccessibilityNodeInfo freshRoot = svc.getRootInActiveWindow();
+            if (freshRoot != null) {
+                android.graphics.Rect freshBounds = com.autoreply.messenger.util.NodeUtil.findFreshBounds(
+                        freshRoot, pending.sender, pending.text, pending.bubbleBounds);
+                if (freshBounds != pending.bubbleBounds) {
+                    Logger.log("retry#" + attempt + " refreshed bounds=["
+                            + freshBounds.left + "," + freshBounds.top
+                            + "][" + freshBounds.right + "," + freshBounds.bottom + "]");
+                    pending.bubbleBounds.set(freshBounds);
+                }
+            }
+        }
+
         swiper.swipe(svc, pending.bubbleBounds, pending.isMine, cfg.gestureDuration, ok -> {
             if (!ok) {
-                if (attempt < 1) { h.postDelayed(() -> doSwipe(attempt + 1), 100); }
+                // ★ OPT: retry delay giảm 200→100ms
+                if (attempt < 2) { h.postDelayed(() -> doSwipe(attempt + 1), 100); }
                 else fail("swipe_failed");
                 return;
             }
-            arm2sTimeout();
-            // Bắt đầu check reply state ngay sau 20ms (swipe callback delay đã tối ưu xuống 20ms)
-            checkReply(0);
+            armTimeout();
+            checkReply(0, attempt);
         });
     }
 
     /**
-     * Poll "Đang trả lời" — check ngay, sau đó mỗi 40ms.
-     * Mục tiêu: phát hiện trong lần check đầu tiên để tổng latency ~200-300ms.
+     * Poll "Đang trả lời" — check ngay, sau đó mỗi 30ms.
+     * ★ OPT: 50 checks × 30ms = 1.5s (đủ dài để bắt reply state)
+     * Nếu hết 50 checks mà không thấy reply state → retry swipe (tối đa 3 lần)
      */
-    private void checkReply(int attempt) {
+    private void checkReply(int attempt, int swipeAttempt) {
         h.postDelayed(() -> {
             AccessibilityNodeInfo root = svc.getRootInActiveWindow();
             if (root == null) { cancelTimeout(); fail("root_null"); return; }
@@ -82,14 +100,21 @@ public class ReplyEngine {
                     return;
                 }
                 doInput(root);
-            } else if (attempt < 30) { // max 30 × 40ms = 1.2s
-                checkReply(attempt + 1);
+            } else if (attempt < 50) { // ★ OPT: 50 checks × 30ms = 1.5s
+                checkReply(attempt + 1, swipeAttempt);
             } else {
                 cancelTimeout();
-                Logger.error("no reply state after " + attempt + " checks");
-                fail("no_reply_state");
+                // ★ FIX: Retry swipe nếu chưa hết số lần thử
+                // Trường hợp swipe "ok" nhưng Messenger không nhận gesture
+                if (swipeAttempt < 2) {
+                    Logger.log("no reply state after " + attempt + " checks → retry swipe #" + (swipeAttempt + 1));
+                    h.postDelayed(() -> doSwipe(swipeAttempt + 1), 100);
+                } else {
+                    Logger.error("no reply state after " + attempt + " checks (all " + (swipeAttempt + 1) + " swipe attempts exhausted)");
+                    fail("no_reply_state");
+                }
             }
-        }, attempt == 0 ? 0 : 40); // lần đầu check ngay, sau đó 40ms/lần
+        }, attempt == 0 ? 0 : 30); // ★ OPT: interval 30ms (nhanh hơn, tổng vẫn 1.5s)
     }
 
     /**
@@ -178,9 +203,10 @@ public class ReplyEngine {
         reset();
     }
 
-    private void arm2sTimeout() {
+    private void armTimeout() {
         timeout = () -> { if (state == State.REPLYING) { Logger.error("timeout"); fail("timeout"); } };
-        h.postDelayed(timeout, 2000);
+        // ★ OPT: timeout 5s (accommodate 3 retry, mỗi retry ~1.5s poll)
+        h.postDelayed(timeout, 5000);
     }
 
     private void cancelTimeout() {

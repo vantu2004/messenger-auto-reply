@@ -163,36 +163,34 @@ public class MainActivity extends AppCompatActivity {
         EditText etName    = v.findViewById(R.id.et_set_name);
         EditText etAddKw   = v.findViewById(R.id.et_add_kw);
         EditText etAddEx   = v.findViewById(R.id.et_add_ex);
-        androidx.recyclerview.widget.RecyclerView rvKw = v.findViewById(R.id.rv_kw);
-        androidx.recyclerview.widget.RecyclerView rvEx = v.findViewById(R.id.rv_ex);
+        com.google.android.flexbox.FlexboxLayout flexKw = v.findViewById(R.id.flex_kw);
+        com.google.android.flexbox.FlexboxLayout flexEx = v.findViewById(R.id.flex_ex);
+        androidx.core.widget.NestedScrollView scrollRoot = v.findViewById(R.id.scroll_root);
 
         etName.setText(ks.name);
 
-        ChipAdapter kwAdapter = new ChipAdapter(ks.keywords);
-        kwAdapter.setOnDelete(p -> { ks.keywords.remove(p); kwAdapter.notifyDataSetChanged(); });
-        com.google.android.flexbox.FlexboxLayoutManager kwLayout = new com.google.android.flexbox.FlexboxLayoutManager(this);
-        kwLayout.setFlexDirection(com.google.android.flexbox.FlexDirection.ROW);
-        kwLayout.setFlexWrap(com.google.android.flexbox.FlexWrap.WRAP);
-        rvKw.setLayoutManager(kwLayout);
-        rvKw.setAdapter(kwAdapter);
-        rvKw.setNestedScrollingEnabled(false);
-
-        ChipAdapter exAdapter = new ChipAdapter(ks.excludes);
-        exAdapter.setOnDelete(p -> { ks.excludes.remove(p); exAdapter.notifyDataSetChanged(); });
-        com.google.android.flexbox.FlexboxLayoutManager exLayout = new com.google.android.flexbox.FlexboxLayoutManager(this);
-        exLayout.setFlexDirection(com.google.android.flexbox.FlexDirection.ROW);
-        exLayout.setFlexWrap(com.google.android.flexbox.FlexWrap.WRAP);
-        rvEx.setLayoutManager(exLayout);
-        rvEx.setAdapter(exAdapter);
-        rvEx.setNestedScrollingEnabled(false);
+        // ★ FIX: Dùng FlexboxLayout (ViewGroup) thay RecyclerView
+        // RecyclerView trong NestedScrollView bị bug measure → cắt items khi > ~50
+        populateChips(flexKw, ks.keywords, scrollRoot);
+        populateChips(flexEx, ks.excludes, scrollRoot);
 
         v.findViewById(R.id.btn_add_kw).setOnClickListener(x -> {
             String kw = etAddKw.getText().toString().trim();
-            if (!kw.isEmpty()) { ks.keywords.add(kw); etAddKw.setText(""); kwAdapter.notifyDataSetChanged(); }
+            if (!kw.isEmpty()) {
+                ks.keywords.add(kw);
+                etAddKw.setText("");
+                populateChips(flexKw, ks.keywords, scrollRoot);
+                scrollRoot.post(() -> scrollRoot.fullScroll(View.FOCUS_DOWN));
+            }
         });
         v.findViewById(R.id.btn_add_ex).setOnClickListener(x -> {
             String ex = etAddEx.getText().toString().trim();
-            if (!ex.isEmpty()) { ks.excludes.add(ex); etAddEx.setText(""); exAdapter.notifyDataSetChanged(); }
+            if (!ex.isEmpty()) {
+                ks.excludes.add(ex);
+                etAddEx.setText("");
+                populateChips(flexEx, ks.excludes, scrollRoot);
+                scrollRoot.post(() -> scrollRoot.fullScroll(View.FOCUS_DOWN));
+            }
         });
 
         AlertDialog dialog = new AlertDialog.Builder(this)
@@ -208,16 +206,32 @@ public class MainActivity extends AppCompatActivity {
                 .create();
         dialog.show();
 
+        // Set dialog height cố định 80% screen
         android.view.Window window = dialog.getWindow();
         if (window != null) {
             android.util.DisplayMetrics dm = getResources().getDisplayMetrics();
-            int maxH = (int) (dm.heightPixels * 0.75);
-            window.setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-            v.post(() -> {
-                if (v.getHeight() > maxH) {
-                    window.setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, maxH);
-                }
+            int dialogH = (int) (dm.heightPixels * 0.80);
+            window.setLayout(android.view.ViewGroup.LayoutParams.MATCH_PARENT, dialogH);
+        }
+    }
+
+    /**
+     * Populate FlexboxLayout với chip views từ list.
+     * Mỗi chip inflate từ item_chip.xml, click X → xóa item → rebuild.
+     */
+    private void populateChips(com.google.android.flexbox.FlexboxLayout container,
+                               java.util.List<String> items,
+                               androidx.core.widget.NestedScrollView scrollRoot) {
+        container.removeAllViews();
+        for (int i = 0; i < items.size(); i++) {
+            View chip = LayoutInflater.from(this).inflate(R.layout.item_chip, container, false);
+            ((TextView) chip.findViewById(R.id.tv_chip)).setText(items.get(i));
+            final int idx = i;
+            chip.findViewById(R.id.btn_chip_del).setOnClickListener(x -> {
+                items.remove(idx);
+                populateChips(container, items, scrollRoot);
             });
+            container.addView(chip);
         }
     }
 
