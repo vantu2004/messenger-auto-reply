@@ -109,4 +109,88 @@ public class ConfigManager {
         }
         return null;
     }
+
+    public String toJsonString(Config c) {
+        try {
+            JSONObject root = new JSONObject();
+            root.put("groupName", c.groupName);
+            root.put("replyText", c.replyText);
+            root.put("enabled", c.enabled);
+            root.put("debugMode", c.debugMode);
+            root.put("gestureDuration", c.gestureDuration);
+            root.put("duplicateCacheSize", c.duplicateCacheSize);
+            root.put("activeSetId", c.activeSetId);
+            root.put("myName", c.myName);
+
+            JSONArray senders = new JSONArray();
+            if (c.allowedSenders != null) {
+                for (String s : c.allowedSenders) {
+                    senders.put(s);
+                }
+            }
+            root.put("allowedSenders", senders);
+
+            JSONArray sets = new JSONArray();
+            if (c.keywordSets != null) {
+                for (KeywordSet ks : c.keywordSets) {
+                    JSONObject obj = new JSONObject();
+                    obj.put("id", ks.id);
+                    obj.put("name", ks.name);
+                    obj.put("active", ks.active);
+                    JSONArray kw = new JSONArray();
+                    for (String k : ks.keywords) kw.put(k);
+                    obj.put("keywords", kw);
+                    JSONArray ex = new JSONArray();
+                    for (String x : ks.excludes) ex.put(x);
+                    obj.put("excludes", ex);
+                    sets.put(obj);
+                }
+            }
+            root.put("keywordSets", sets);
+            return root.toString(4);
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    public Config fromJsonString(String jsonStr) throws Exception {
+        JSONObject root = new JSONObject(jsonStr);
+        Config c = new Config();
+        c.groupName = root.optString("groupName", "");
+        c.replyText = root.optString("replyText", "nhận");
+        c.enabled = root.optBoolean("enabled", false);
+        c.debugMode = root.optBoolean("debugMode", false);
+        c.gestureDuration = root.optInt("gestureDuration", 150);
+        c.duplicateCacheSize = root.optInt("duplicateCacheSize", 50);
+        c.activeSetId = root.optString("activeSetId", "");
+        c.myName = root.optString("myName", "");
+
+        c.allowedSenders = new ArrayList<>();
+        JSONArray senders = root.optJSONArray("allowedSenders");
+        if (senders != null) {
+            for (int i = 0; i < senders.length(); i++) {
+                c.allowedSenders.add(senders.getString(i));
+            }
+        }
+
+        c.keywordSets = new ArrayList<>();
+        JSONArray sets = root.optJSONArray("keywordSets");
+        if (sets != null) {
+            for (int i = 0; i < sets.length(); i++) {
+                JSONObject obj = sets.getJSONObject(i);
+                KeywordSet ks = new KeywordSet(obj.getString("id"), obj.getString("name"));
+                ks.active = obj.optBoolean("active", false);
+                JSONArray kw = obj.optJSONArray("keywords");
+                if (kw != null) {
+                    for (int j = 0; j < kw.length(); j++) ks.keywords.add(kw.getString(j));
+                }
+                JSONArray ex = obj.optJSONArray("excludes");
+                if (ex != null) {
+                    for (int j = 0; j < ex.length(); j++) ks.excludes.add(ex.getString(j));
+                }
+                c.keywordSets.add(ks);
+            }
+        }
+        return c;
+    }
 }
