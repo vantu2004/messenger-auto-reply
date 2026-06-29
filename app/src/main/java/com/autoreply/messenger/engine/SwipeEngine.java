@@ -19,14 +19,14 @@ public class SwipeEngine {
      *
      * Từ XML dump: bubble trái [143,332][326,431], bubble phải [875,525][1058,671]
      *
-     * ★ OPT: duration 150ms (ngưỡng tối thiểu Messenger nhận diện reply gesture).
-     * Thêm điểm dừng (hold) 40ms ở cuối path để Messenger nhận gesture ổn định.
-     * Delay callback 80ms — poll loop sẽ bắt kịp nếu panel chưa render xong.
+     * ★ OPT: duration 100ms (tối ưu hóa tốc độ nhưng vẫn đủ để Messenger nhận diện cử chỉ).
+     * Thêm điểm dừng (hold) 30ms ở cuối path để Messenger nhận gesture ổn định.
+     * Delay callback 50ms — poll loop sẽ bắt đầu sớm hơn và tự động đợi nếu panel chưa render xong.
      */
     public void swipe(AccessibilityService svc, Rect bounds, boolean isMine, int durationMs, Callback cb) {
         int cy = bounds.centerY();
-        // ★ OPT: tối thiểu 150ms — ngưỡng tối thiểu Messenger nhận reply gesture
-        int dur  = Math.max(150, durationMs);
+        // ★ OPT: tối thiểu 100ms — ngưỡng tối thiểu tối ưu hóa tốc độ nhận reply gesture
+        int dur  = Math.max(100, durationMs);
 
         int screenW = 1080;
         if (svc != null && svc.getResources() != null) {
@@ -56,10 +56,10 @@ public class SwipeEngine {
         p.moveTo(sx, cy);
         p.lineTo(ex, cy);
         // Hold effect: di chuyển cực nhỏ (1px) — giữ Messenger nhận gesture
-        // Tổng duration = dur (swipe) + 40ms (hold)
+        // Tổng duration = dur (swipe) + 30ms (hold)
         p.lineTo(ex + 1, cy);
 
-        int totalDur = dur + 40; // 150ms swipe + 40ms hold = 190ms total
+        int totalDur = dur + 30; // 100ms swipe + 30ms hold = 130ms total
 
         GestureDescription g = new GestureDescription.Builder()
                 .addStroke(new GestureDescription.StrokeDescription(p, 0, totalDur))
@@ -68,8 +68,8 @@ public class SwipeEngine {
         boolean ok = svc.dispatchGesture(g, new AccessibilityService.GestureResultCallback() {
             @Override public void onCompleted(GestureDescription g) {
                 Logger.log("swipe ok");
-                // ★ OPT: delay 80ms — poll loop sẽ bắt kịp nếu chưa render xong
-                new Handler(Looper.getMainLooper()).postDelayed(() -> cb.onDone(true), 80);
+                // ★ OPT: delay 50ms — poll loop sẽ bắt kịp nếu chưa render xong
+                new Handler(Looper.getMainLooper()).postDelayed(() -> cb.onDone(true), 50);
             }
             @Override public void onCancelled(GestureDescription g) {
                 Logger.log("swipe cancelled");

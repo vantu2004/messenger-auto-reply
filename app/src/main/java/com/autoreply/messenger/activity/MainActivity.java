@@ -25,6 +25,18 @@ import com.autoreply.messenger.storage.ConfigManager;
 import com.autoreply.messenger.ui.adapter.ChipAdapter;
 import com.autoreply.messenger.ui.adapter.KeywordSetAdapter;
 import com.autoreply.messenger.util.Logger;
+import android.content.ClipData;
+import android.content.ClipDescription;
+import android.content.ClipboardManager;
+import android.content.Context;
+import android.net.Uri;
+import android.os.ParcelFileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import com.google.android.flexbox.FlexboxLayout;
+import androidx.core.widget.NestedScrollView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -35,6 +47,28 @@ public class MainActivity extends AppCompatActivity {
     private String lastOrder = "—";
     private long lastLatency = 0;
     private final Handler handler = new Handler(Looper.getMainLooper());
+
+    private final ActivityResultLauncher<Intent> createFileLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                    result -> {
+                        if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                            Uri uri = result.getData().getData();
+                            if (uri != null) {
+                                writeConfigToUri(uri);
+                            }
+                        }
+                    });
+
+    private final ActivityResultLauncher<Intent> openFileLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                    result -> {
+                        if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                            Uri uri = result.getData().getData();
+                            if (uri != null) {
+                                readConfigFromUri(uri);
+                            }
+                        }
+                    });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         b.btnLogs.setOnClickListener(v -> showLogs());
+        b.btnBackupRestore.setOnClickListener(v -> showBackupRestoreDialog());
         updateStatus();
     }
 
@@ -329,5 +364,130 @@ public class MainActivity extends AppCompatActivity {
                 .setMessage("Vào Settings → Accessibility → " + getString(R.string.accessibility_label) + " → BẬT")
                 .setPositiveButton("Mở Settings", (d, w) -> startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)))
                 .setNegativeButton("Hủy", null).show();
+    }
+
+    private void showBackupRestoreDialog() {
+        String[] options = {
+                "📤 Xuất cấu hình (Sao chép vào Clipboard)",
+                "💾 Xuất cấu hình (Lưu thành tệp .json)",
+                "📥 Nhập cấu hình (Dán từ Clipboard)",
+                "📂 Nhập cấu hình (Chọn tệp .json)"
+        };
+
+        new AlertDialog.Builder(this)
+                .setTitle("Sao lưu & Khôi phục")
+                .setItems(options, (dialog, which) -> {
+                    switch (which) {
+                        case 0:
+                            exportToClipboard();
+                            break;
+                        case 1:
+                            exportToFile();
+                            break;
+                        case 2:
+                            importFromClipboard();
+                            break;
+                        case 3:
+                            importFromFile();
+                            break;
+                    }
+                })
+                .setNegativeButton("Đóng", null)
+                .show();
+    }
+
+    private void exportToClipboard() {
+        try {
+            String json = cfgMgr.toJsonString(config);
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText("MessengerAutoReply Config", json);
+            if (clipboard != null) {
+                clipboard.setPrimaryClip(clip);
+                Toast.makeText(this, "Đã sao chép cấu hình vào Clipboard", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "Lỗi sao chép: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void importFromClipboard() {
+        try {
+            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            if (clipboard == null || !clipboard.hasPrimaryClip()) {
+                Toast.makeText(this, "Clipboard trống", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            ClipData clip = clipboard.getPrimaryClip();
+            if (clip == null || clip.getItemCount() == 0) {
+                Toast.makeText(this, "Clipboard trống", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            String pasteData = clip.getItemAt(0).getText().toString().trim();
+            if (TextUtils.isEmpty(pasteData)) {
+                Toast.makeText(this, "Nội dung Clipboard trống", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Config imported = cfgMgr.fromJsonString(pasteData);
+            if (imported.keywordSets == null || imported.keywordSets.isEmpty()) {
+                Toast.makeText(this, "Mã cấu hình không hợp lệ", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            applyAndSaveImportedConfig(imported);
+            Toast.makeText(this, "Khôi phục cấu hình thành công", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "Lỗi khôi phục: " + e.getMessage() + "\nHãy đảm bảo bạn đã sao chép đúng mã cấu hình.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void exportToFile() {
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("application/json");
+        intent.putExtra(Intent.EXTRA_TITLE, "messenger_auto_reply_config.json");
+        createFileLauncher.launch(intent);
+    }
+
+    private void importFromFile() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("application/json");
+        openFileLauncher.launch(intent);
+    }
+
+    private void writeConfigToUri(Uri uri) {
+        try (ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(uri, "w");
+             FileOutputStream fileOutputStream = new FileOutputStream(pfd.getFileDescriptor())) {
+            String json = cfgMgr.toJsonString(config);
+            fileOutputStream.write(json.getBytes());
+            Toast.makeText(this, "Đã lưu cấu hình vào tệp thành công", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "Lỗi khi lưu tệp: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void readConfigFromUri(Uri uri) {
+        try (ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(uri, "r");
+             FileInputStream fileInputStream = new FileInputStream(pfd.getFileDescriptor())) {
+            StringBuilder sb = new StringBuilder();
+            byte[] buffer = new byte[1024];
+            int read;
+            while ((read = fileInputStream.read(buffer)) != -1) {
+                sb.append(new String(buffer, 0, read));
+            }
+            Config imported = cfgMgr.fromJsonString(sb.toString());
+            applyAndSaveImportedConfig(imported);
+            Toast.makeText(this, "Đã khôi phục cấu hình từ tệp", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "Lỗi đọc tệp: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void applyAndSaveImportedConfig(Config imported) {
+        config = imported;
+        save();
+        reload();
+        Intent intent = getIntent();
+        finish();
+        startActivity(intent);
     }
 }
