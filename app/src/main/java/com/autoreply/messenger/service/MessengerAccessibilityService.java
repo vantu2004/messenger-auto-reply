@@ -103,16 +103,19 @@ public class MessengerAccessibilityService extends AccessibilityService {
         if (now - lastEventTime < THROTTLE_MS) return;
         lastEventTime = now;
 
-        if (!replyEngine.isIdle()) return;
+        AccessibilityNodeInfo root = getRootInActiveWindow();
+        if (root == null) return;
+
+        if (!replyEngine.isIdle()) {
+            replyEngine.onEvent(root);
+            return;
+        }
 
         Config cfg = cfgMgr.getCached();
         if (!cfg.enabled) return;
 
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         if (pm != null && !pm.isInteractive()) return;
-
-        AccessibilityNodeInfo root = getRootInActiveWindow();
-        if (root == null) return;
 
         try { process(root, cfg); }
         catch (Exception e) { Logger.error("process ex: " + e.getMessage()); }
