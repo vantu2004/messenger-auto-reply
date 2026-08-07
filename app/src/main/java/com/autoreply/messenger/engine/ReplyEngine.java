@@ -11,7 +11,7 @@ import com.autoreply.messenger.util.Logger;
 import com.autoreply.messenger.util.NodeUtil;
 
 public class ReplyEngine {
-    public enum State { IDLE, FOUND, REPLYING, SENDING, DONE }
+    public enum State { IDLE, FOUND, REPLYING, WAITING_INPUT, SENDING, DONE }
 
     public interface Listener {
         void onState(State s);
@@ -22,7 +22,6 @@ public class ReplyEngine {
     private State state = State.IDLE;
     private final Handler h = new Handler(Looper.getMainLooper());
     private final SwipeEngine swiper = new SwipeEngine();
-    private final InputEngine input = new InputEngine();
     private Listener listener;
 
     private AccessibilityService svc;
@@ -48,6 +47,7 @@ public class ReplyEngine {
 
     private void doSwipe(int attempt) {
         setState(State.REPLYING);
+        Logger.log("doSwipe: attempt#" + attempt + " t=" + elapsed() + "ms");
 
         // ★ FIX: Re-fetch fresh bounds trước mỗi lần retry
         // Vì bubble có thể đã shift position khi có tin mới
@@ -99,7 +99,7 @@ public class ReplyEngine {
                     fail("wrong_reply_target");
                     return;
                 }
-                doInput(root);
+                waitForUserInput();
             } else if (attempt < 50) { // ★ OPT: 50 checks × 30ms = 1.5s
                 checkReply(attempt + 1, swipeAttempt);
             } else {
@@ -174,27 +174,83 @@ public class ReplyEngine {
         }
     }
 
-    private void doInput(AccessibilityNodeInfo root) {
-        setState(State.SENDING);
-        AccessibilityNodeInfo et = NodeUtil.findInputBox(root);
-        if (et == null) { fail("no_input"); return; }
-        input.focus(et);
-        if (!input.setText(et, cfg.replyText)) { fail("set_text_fail"); return; }
-        // Delay 15ms rồi click send — tối ưu từ 50ms xuống 15ms
-        h.postDelayed(this::doSend, 15);
+    /**
+     * Kiểm tra text có sẵn trong ô input của Messenger.
+     * Nếu khớp với cfg.replyText thì thực hiện gửi luôn.
+     * Nếu không khớp (hoặc trống) thì fail ngay lập tức, không lặp lại/poll.
+     */
+    private void waitForUserInput() {
+        setState(State.WAITING_INPUT);
+        Logger.log("waitInput: checking, expecting='" + cfg.replyText
+                + "' t=" + elapsed() + "ms");
+
+        AccessibilityNodeInfo root = svc.getRootInActiveWindow();
+        if (root == null) {
+            Logger.error("waitInput: root null t=" + elapsed() + "ms");
+            fail("root_null_waiting");
+            return;
+        }
+
+        // Check reply panel vẫn mở
+        if (!NodeUtil.isInReplyMode(root)) {
+            Logger.error("waitInput: reply panel not in reply mode t=" + elapsed() + "ms");
+            fail("not_in_reply_mode");
+            return;
+        }
+
+        // Lấy text hiện tại từ input box
+        String currentText = NodeUtil.getInputBoxText(root);
+        if (currentText == null) {
+            Logger.error("waitInput: input box not found t=" + elapsed() + "ms");
+            fail("no_input_waiting");
+            return;
+        }
+
+        String trimmed = currentText.trim();
+        String expected = cfg.replyText.trim();
+        boolean match = !trimmed.isEmpty()
+                && trimmed.equalsIgnoreCase(expected);
+
+        Logger.log("waitInput: currentText='" + trimmed
+                + "' expected='" + expected
+                + "' match=" + match
+                + " t=" + elapsed() + "ms");
+
+        if (match) {
+            doSend(root);
+        } else {
+            fail("text_mismatch_or_empty");
+        }
     }
 
-    private void doSend() {
-        AccessibilityNodeInfo root = svc.getRootInActiveWindow();
-        if (root == null) { fail("root_null_send"); return; }
+    private void doSend(AccessibilityNodeInfo root) {
+        setState(State.SENDING);
+        if (root == null) {
+            root = svc.getRootInActiveWindow();
+        }
+        if (root == null) {
+            Logger.error("preSend: root null t=" + elapsed() + "ms");
+            fail("root_null_send");
+            return;
+        }
+
         AccessibilityNodeInfo btn = NodeUtil.findSendButton(root);
-        if (btn == null) { fail("no_send_btn"); return; }
+        if (btn == null) {
+            Logger.error("preSend: no send button t=" + elapsed() + "ms");
+            fail("no_send_btn");
+            return;
+        }
+
         boolean ok = btn.performAction(AccessibilityNodeInfo.ACTION_CLICK);
         long ms = System.currentTimeMillis() - t0;
         Logger.log("send=" + ok + " latency=" + ms + "ms");
         setState(State.DONE);
         if (listener != null) listener.onSuccess(pending.sender, pending.text, ms);
         reset();
+    }
+
+    private long elapsed() {
+        return System.currentTimeMillis() - t0;
     }
 
     private void fail(String r) {

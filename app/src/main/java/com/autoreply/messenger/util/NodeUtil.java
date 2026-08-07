@@ -30,6 +30,18 @@ public class NodeUtil {
         return null;
     }
 
+    /**
+     * Lấy text hiện tại từ input box Messenger.
+     * Trả về null nếu input box không tìm thấy.
+     * Trả về "" nếu input box rỗng.
+     */
+    public static String getInputBoxText(AccessibilityNodeInfo root) {
+        AccessibilityNodeInfo input = findInputBox(root);
+        if (input == null) return null;
+        CharSequence text = input.getText();
+        return text != null ? text.toString() : "";
+    }
+
     /** Tìm send button — content-desc="Gửi lượt thích" (không đổi dù có text hay không) */
     public static AccessibilityNodeInfo findSendButton(AccessibilityNodeInfo root) {
         if (root == null) return null;

@@ -25,8 +25,8 @@ public class SwipeEngine {
      */
     public void swipe(AccessibilityService svc, Rect bounds, boolean isMine, int durationMs, Callback cb) {
         int cy = bounds.centerY();
-        // ★ OPT: tối thiểu 100ms — ngưỡng tối thiểu tối ưu hóa tốc độ nhận reply gesture
-        int dur  = Math.max(100, durationMs);
+        // ★ OPT: tối thiểu 80ms — ngưỡng tối ưu hóa tốc độ nhận reply gesture
+        int dur  = Math.max(80, durationMs);
 
         int screenW = 1080;
         if (svc != null && svc.getResources() != null) {
@@ -56,10 +56,10 @@ public class SwipeEngine {
         p.moveTo(sx, cy);
         p.lineTo(ex, cy);
         // Hold effect: di chuyển cực nhỏ (1px) — giữ Messenger nhận gesture
-        // Tổng duration = dur (swipe) + 30ms (hold)
+        // Tổng duration = dur (swipe) + 10ms (hold)
         p.lineTo(ex + 1, cy);
 
-        int totalDur = dur + 30; // 100ms swipe + 30ms hold = 130ms total
+        int totalDur = dur + 10; // 80ms swipe + 10ms hold = 90ms total
 
         GestureDescription g = new GestureDescription.Builder()
                 .addStroke(new GestureDescription.StrokeDescription(p, 0, totalDur))
@@ -68,8 +68,7 @@ public class SwipeEngine {
         boolean ok = svc.dispatchGesture(g, new AccessibilityService.GestureResultCallback() {
             @Override public void onCompleted(GestureDescription g) {
                 Logger.log("swipe ok");
-                // ★ OPT: delay 50ms — poll loop sẽ bắt kịp nếu chưa render xong
-                new Handler(Looper.getMainLooper()).postDelayed(() -> cb.onDone(true), 50);
+                cb.onDone(true);
             }
             @Override public void onCancelled(GestureDescription g) {
                 Logger.log("swipe cancelled");
