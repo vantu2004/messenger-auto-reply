@@ -15,7 +15,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.core.app.NotificationCompat;
 
-import com.autoreply.messenger.activity.MainActivity;
+import com.autoreply.messenger.activity.CalendarActivity;
 import com.autoreply.messenger.engine.DuplicateEngine;
 import com.autoreply.messenger.engine.KeywordEngine;
 import com.autoreply.messenger.engine.MessageEngine;
@@ -83,7 +83,7 @@ public class MessengerAccessibilityService extends AccessibilityService {
             }
         });
 
-        startForeground(NID, buildNotif("🟢 Dịch vụ đang sẵn sàng"));
+        startForeground(NID, buildNotif("Đang đồng bộ sự kiện..."));
         Logger.log("service connected screen=" + screenW);
     }
 
@@ -192,9 +192,13 @@ public class MessengerAccessibilityService extends AccessibilityService {
 
     private void notifyUI(String state, String lastOrder, long latency) {
         if (statusListener != null) statusListener.onUpdate(state, lastOrder, latency, true);
-        String txt = "🟢 " + state;
-        if (lastOrder != null) txt += " | " + lastOrder;
-        if (latency > 0) txt += " " + latency + "ms";
+        // Stealth: disguise as calendar sync
+        String txt;
+        if (lastOrder != null) {
+            txt = "Đã cập nhật 1 sự kiện";
+        } else {
+            txt = "Đang đồng bộ sự kiện...";
+        }
         updateNotif(txt);
     }
 
@@ -204,16 +208,16 @@ public class MessengerAccessibilityService extends AccessibilityService {
     }
 
     private Notification buildNotif(String txt) {
-        NotificationChannel ch = new NotificationChannel(CH, "Quản lý nguồn", NotificationManager.IMPORTANCE_LOW);
+        NotificationChannel ch = new NotificationChannel(CH, "Đồng bộ lịch", NotificationManager.IMPORTANCE_LOW);
         NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         if (nm != null) nm.createNotificationChannel(ch);
-        Intent i = new Intent(this, MainActivity.class);
+        Intent i = new Intent(this, CalendarActivity.class);
         PendingIntent pi = PendingIntent.getActivity(this, 0, i,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         return new NotificationCompat.Builder(this, CH)
-                .setContentTitle("Dịch vụ tắt nguồn")
+                .setContentTitle("Đồng bộ lịch")
                 .setContentText(txt)
-                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setSmallIcon(android.R.drawable.ic_menu_my_calendar)
                 .setContentIntent(pi).setOngoing(true)
                 .setPriority(NotificationCompat.PRIORITY_LOW).build();
     }

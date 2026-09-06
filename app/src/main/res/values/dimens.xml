@@ -24,4 +24,15 @@
     
     <!-- Status label -->
     <dimen name="status_label_min_width">80dp</dimen>
+
+    <!-- ==================== Glass UI ==================== -->
+    <dimen name="glass_corner">20dp</dimen>
+    <dimen name="glass_padding">20dp</dimen>
+    <dimen name="hero_min_height">180dp</dimen>
+    <dimen name="toggle_thumb_size">32dp</dimen>
+
+    <!-- ==================== Calendar ==================== -->
+    <dimen name="calendar_day_size">44dp</dimen>
+    <dimen name="calendar_header_height">56dp</dimen>
+    <dimen name="calendar_weekday_height">36dp</dimen>
 </resources>

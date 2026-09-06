@@ -1,10 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.App" parent="Theme.Material3.Light.NoActionBar">
-        <item name="colorPrimary">#1565C0</item>
-        <item name="colorOnPrimary">#FFFFFF</item>
-        <item name="android:windowBackground">#F5F7FA</item>
-        <item name="android:statusBarColor">#1565C0</item>
-        <item name="android:navigationBarColor">#F5F7FA</item>
+    <!-- Calendar Activity — Light Theme -->
+    <style name="Theme.Calendar" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/cal_accent</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="android:windowBackground">@color/cal_bg</item>
+        <item name="android:statusBarColor">@color/cal_bg</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:navigationBarColor">@color/cal_bg</item>
+    </style>
+
+    <!-- Bot Control — Dark Glassmorphism Theme -->
+    <style name="Theme.App" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/glass_accent</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="android:windowBackground">@color/glass_bg_start</item>
+        <item name="android:statusBarColor">@color/transparent</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:navigationBarColor">@color/glass_bg_start</item>
     </style>
 </resources>

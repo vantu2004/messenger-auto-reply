@@ -37,6 +37,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import com.google.android.flexbox.FlexboxLayout;
 import androidx.core.widget.NestedScrollView;
+import androidx.core.content.ContextCompat;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -47,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private String lastOrder = "—";
     private long lastLatency = 0;
     private final Handler handler = new Handler(Looper.getMainLooper());
+    private boolean suppressSwitchListener = false;
 
     private final ActivityResultLauncher<Intent> createFileLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
@@ -80,11 +82,42 @@ public class MainActivity extends AppCompatActivity {
         setupUI();
     }
 
+    @Override
+    public void onBackPressed() {
+        // Save fields before going back to Calendar
+        saveFields();
+        super.onBackPressed();
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+    }
+
     private void setupUI() {
         b.etGroupName.setText(config.groupName);
         b.etReplyText.setText(config.replyText);
-// Trong setupUI(), thêm sau b.etReplyText.setText(config.replyText);
         b.etMyName.setText(config.myName);
+
+        // ==================== Master Toggle ====================
+        suppressSwitchListener = true;
+        b.switchMaster.setChecked(config.enabled);
+        suppressSwitchListener = false;
+        updateHeroUI(config.enabled);
+
+        b.switchMaster.setOnCheckedChangeListener((v, checked) -> {
+            if (suppressSwitchListener) return;
+            if (checked && !isAccessibilityOn()) {
+                suppressSwitchListener = true;
+                b.switchMaster.setChecked(false);
+                suppressSwitchListener = false;
+                showAccessDialog();
+                return;
+            }
+            // Save fields before toggling
+            saveFields();
+            config.enabled = checked;
+            save();
+            reload();
+            updateHeroUI(checked);
+            Toast.makeText(this, checked ? "✅ Bot đã bật" : "⛔ Bot đã dừng", Toast.LENGTH_SHORT).show();
+        });
 
         // Allowed senders chips
         refreshSenderChips();
@@ -126,30 +159,34 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        b.btnStart.setOnClickListener(v -> {
-            if (!isAccessibilityOn()) { showAccessDialog(); return; }
-            config.groupName = b.etGroupName.getText().toString().trim();
-            config.replyText = b.etReplyText.getText().toString().trim();
-            // Trong btnStart listener, thêm sau config.replyText = ...
-            config.myName = b.etMyName.getText().toString().trim();
-            config.enabled = true;
-            save();
-            reload();
-            updateStatus();
-            Toast.makeText(this, "✅ Bot đã bật", Toast.LENGTH_SHORT).show();
-        });
-
-        b.btnStop.setOnClickListener(v -> {
-            config.enabled = false;
-            save();
-            reload();
-            updateStatus();
-            Toast.makeText(this, "⛔ Bot đã dừng", Toast.LENGTH_SHORT).show();
-        });
-
         b.btnLogs.setOnClickListener(v -> showLogs());
         b.btnBackupRestore.setOnClickListener(v -> showBackupRestoreDialog());
         updateStatus();
+    }
+
+    /**
+     * Update hero section visuals based on bot state.
+     */
+    private void updateHeroUI(boolean enabled) {
+        if (enabled) {
+            b.tvHeroStatus.setText("Bot đang chạy");
+            b.tvHeroStatus.setTextColor(ContextCompat.getColor(this, R.color.glass_green));
+            b.viewGlow.setBackgroundResource(R.drawable.bg_hero_glow_on);
+        } else {
+            b.tvHeroStatus.setText("Bot đã tắt");
+            b.tvHeroStatus.setTextColor(ContextCompat.getColor(this, R.color.glass_red));
+            b.viewGlow.setBackgroundResource(R.drawable.bg_hero_glow_off);
+        }
+    }
+
+    /**
+     * Save text fields to config without toggling enabled state.
+     */
+    private void saveFields() {
+        config.groupName = b.etGroupName.getText().toString().trim();
+        config.replyText = b.etReplyText.getText().toString().trim();
+        config.myName = b.etMyName.getText().toString().trim();
+        save();
     }
 
     private void refreshSenderChips() {
@@ -281,7 +318,7 @@ public class MainActivity extends AppCompatActivity {
         tv.setText(sb.length() > 0 ? sb.toString() : "(trống)");
         tv.setTextSize(12);
         tv.setTypeface(android.graphics.Typeface.MONOSPACE);
-        tv.setTextColor(0xFF37474F);
+        tv.setTextColor(getColor(R.color.white));
         sv.addView(tv);
 
         AlertDialog dialog = new AlertDialog.Builder(this)
@@ -310,15 +347,25 @@ public class MainActivity extends AppCompatActivity {
 
     @Override protected void onResume() {
         super.onResume();
+        // Refresh switch state (in case service changed)
+        suppressSwitchListener = true;
+        b.switchMaster.setChecked(config.enabled);
+        suppressSwitchListener = false;
+        updateHeroUI(config.enabled);
         updateStatus();
         MessengerAccessibilityService.setStatusListener((state, lastOrd, latency, running) ->
             runOnUiThread(() -> {
                 if (lastOrd != null) lastOrder = lastOrd;
                 if (latency > 0) lastLatency = latency;
-                b.tvStatus.setText(running && config.enabled ? "🟢 Running" : "🔴 Stopped");
-                b.tvState.setText(state);
+                b.tvStatus.setText(state);
                 b.tvLastOrder.setText(lastOrder);
                 if (lastLatency > 0) b.tvLatency.setText(lastLatency + " ms");
+                // Update hero based on actual running state
+                boolean isOn = running && config.enabled;
+                updateHeroUI(isOn);
+                suppressSwitchListener = true;
+                b.switchMaster.setChecked(isOn);
+                suppressSwitchListener = false;
             }));
         handler.postDelayed(refresher, 3000);
     }
@@ -327,6 +374,8 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         MessengerAccessibilityService.setStatusListener(null);
         handler.removeCallbacks(refresher);
+        // Auto-save fields when leaving
+        saveFields();
     }
 
     private final Runnable refresher = new Runnable() {
@@ -336,11 +385,11 @@ public class MainActivity extends AppCompatActivity {
     private void updateStatus() {
         boolean svcOk = MessengerAccessibilityService.isRunning();
         boolean botOn = config.enabled;
-        if (!svcOk) b.tvStatus.setText("⚠️ Chưa bật Accessibility");
-        else if (botOn) b.tvStatus.setText("🟢 Running");
-        else b.tvStatus.setText("🔴 Stopped");
-        b.btnStart.setEnabled(!botOn);
-        b.btnStop.setEnabled(botOn);
+        if (!svcOk) {
+            b.tvStatus.setText("⚠️ Chưa bật Accessibility");
+        } else {
+            b.tvStatus.setText(botOn ? "RUNNING" : "IDLE");
+        }
     }
 
     private void save() { cfgMgr.save(config); }
@@ -368,10 +417,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void showBackupRestoreDialog() {
         String[] options = {
-                "📤 Xuất cấu hình (Sao chép vào Clipboard)",
-                "💾 Xuất cấu hình (Lưu thành tệp .json)",
-                "📥 Nhập cấu hình (Dán từ Clipboard)",
-                "📂 Nhập cấu hình (Chọn tệp .json)"
+                "Xuất cấu hình (Sao chép vào Clipboard)",
+                "Xuất cấu hình (Lưu thành tệp .json)",
+                "Nhập cấu hình (Dán từ Clipboard)",
+                "Nhập cấu hình (Chọn tệp .json)"
         };
 
         new AlertDialog.Builder(this)

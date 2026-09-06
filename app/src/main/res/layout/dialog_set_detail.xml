@@ -13,11 +13,17 @@
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="TÊN BỘ" android:textSize="11sp" android:textColor="#78909C"
             android:textStyle="bold" android:layout_marginBottom="6dp"/>
-        <EditText android:id="@+id/et_set_name" android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:minHeight="@dimen/input_min_height"
+
+        <EditText
+            android:id="@+id/et_set_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:background="#808080"
             android:inputType="text"
-            android:background="@drawable/bg_field" android:paddingHorizontal="12dp"
-            android:textSize="14sp" android:layout_marginBottom="16dp"/>
+            android:minHeight="@dimen/input_min_height"
+            android:paddingHorizontal="12dp"
+            android:textSize="14sp" />
 
         <!-- Keywords kích hoạt -->
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
@@ -31,18 +37,39 @@
             app:flexDirection="row"
             app:flexWrap="wrap"/>
 
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:orientation="horizontal" android:layout_marginBottom="16dp">
-            <EditText android:id="@+id/et_add_kw" android:layout_width="0dp"
-                android:layout_height="wrap_content" android:minHeight="44dp"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/et_add_kw"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
                 android:layout_weight="1"
-                android:hint="Thêm keyword..." android:inputType="text"
-                android:background="@drawable/bg_field" android:paddingHorizontal="10dp"
-                android:textSize="13sp"/>
-            <com.google.android.material.button.MaterialButton android:id="@+id/btn_add_kw"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:minHeight="44dp" android:layout_marginStart="8dp" android:text="+" android:textSize="18sp"
-                app:cornerRadius="10dp" app:backgroundTint="#1565C0"/>
+                android:background="#808080"
+                android:gravity="center_vertical"
+                android:hint="Thêm keyword..."
+                android:inputType="text"
+                android:paddingHorizontal="10dp"
+                android:textSize="13sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_add_kw"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_marginStart="8dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:padding="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:text="+"
+                android:textSize="18sp"
+                app:backgroundTint="#1565C0" />
+
         </LinearLayout>
 
         <!-- Divider -->
@@ -61,18 +88,38 @@
             app:flexDirection="row"
             app:flexWrap="wrap"/>
 
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
             android:orientation="horizontal">
-            <EditText android:id="@+id/et_add_ex" android:layout_width="0dp"
-                android:layout_height="wrap_content" android:minHeight="44dp"
+
+            <EditText
+                android:id="@+id/et_add_ex"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
                 android:layout_weight="1"
-                android:hint="VD: hủy, test, fake..." android:inputType="text"
-                android:background="@drawable/bg_field" android:paddingHorizontal="10dp"
-                android:textSize="13sp"/>
-            <com.google.android.material.button.MaterialButton android:id="@+id/btn_add_ex"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:minHeight="44dp" android:layout_marginStart="8dp" android:text="+" android:textSize="18sp"
-                app:cornerRadius="10dp" app:backgroundTint="#E53935"/>
+                android:background="#808080"
+                android:gravity="center_vertical"
+                android:hint="VD: hủy, test, fake..."
+                android:inputType="text"
+                android:paddingHorizontal="10dp"
+                android:textSize="13sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_add_ex"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_marginStart="8dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:padding="0dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:text="+"
+                android:textSize="18sp"
+                app:backgroundTint="#E53935" />
+
         </LinearLayout>
 
     </LinearLayout>

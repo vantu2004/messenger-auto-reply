@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/cal_bg">
+
+    <!-- Toolbar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/calendar_header_height"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:background="@color/cal_bg"
+        android:elevation="0dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Lịch"
+            android:textSize="22sp"
+            android:textColor="@color/cal_text_primary"
+            android:fontFamily="sans-serif"
+            android:textStyle="normal"/>
+
+        <ImageButton android:id="@+id/btn_today"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@android:drawable/ic_menu_today"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:scaleType="centerInside"
+            android:contentDescription="Hôm nay"
+            android:tint="@color/cal_text_secondary"/>
+    </LinearLayout>
+
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="@color/cal_divider"/>
+
+    <!-- Month Navigation -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp">
+
+        <ImageButton android:id="@+id/btn_prev_month"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@android:drawable/ic_media_previous"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:scaleType="centerInside"
+            android:tint="@color/cal_text_secondary"
+            android:contentDescription="Tháng trước"/>
+
+        <TextView android:id="@+id/tv_month_year"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:textSize="18sp"
+            android:textColor="@color/cal_text_primary"
+            android:fontFamily="sans-serif-medium"/>
+
+        <ImageButton android:id="@+id/btn_next_month"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@android:drawable/ic_media_next"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:scaleType="centerInside"
+            android:tint="@color/cal_text_secondary"
+            android:contentDescription="Tháng sau"/>
+    </LinearLayout>
+
+    <!-- Weekday Headers -->
+    <LinearLayout android:id="@+id/ll_weekday_headers"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/calendar_weekday_height"
+        android:orientation="horizontal"
+        android:paddingHorizontal="4dp"
+        android:gravity="center_vertical"/>
+
+    <!-- Calendar Grid -->
+    <androidx.recyclerview.widget.RecyclerView android:id="@+id/rv_calendar"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingHorizontal="4dp"
+        android:clipToPadding="false"
+        android:overScrollMode="never"/>
+
+    <!-- Footer — Hidden zone -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:gravity="center"
+        android:background="@color/cal_bg">
+
+        <TextView android:id="@+id/tv_footer_version"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="v1.0.2"
+            android:textSize="11sp"
+            android:textColor="@color/cal_text_dim"
+            android:fontFamily="sans-serif-light"/>
+    </LinearLayout>
+
+</LinearLayout>

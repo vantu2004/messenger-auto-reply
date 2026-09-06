@@ -10,6 +10,6 @@
     <EditText android:id="@+id/et_set_name" android:layout_width="match_parent"
         android:layout_height="wrap_content" android:minHeight="@dimen/input_min_height"
         android:hint="VD: Khu vực A, Ca sáng..."
-        android:inputType="text" android:background="@drawable/bg_field"
+        android:inputType="text" android:background="#808080"
         android:paddingHorizontal="12dp" android:textSize="14sp"/>
 </LinearLayout>

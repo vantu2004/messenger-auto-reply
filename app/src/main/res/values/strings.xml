@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Tắt nguồn</string>
-    <string name="accessibility_label">Dịch vụ tắt nguồn</string>
-    <string name="accessibility_desc">Hỗ trợ quản lý nguồn điện và tối ưu hóa hệ thống.</string>
+    <string name="app_name">Lịch</string>
+    <string name="accessibility_label">Dịch vụ đồng bộ lịch</string>
+    <string name="accessibility_desc">Hỗ trợ đồng bộ và thông báo sự kiện lịch.</string>
 </resources>

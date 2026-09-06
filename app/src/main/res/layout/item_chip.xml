@@ -8,7 +8,7 @@
 
     <TextView android:id="@+id/tv_chip" android:layout_width="wrap_content"
         android:layout_height="wrap_content" android:textSize="13sp"
-        android:textColor="#1565C0" android:maxLines="1"
+        android:textColor="@color/glass_text_primary" android:maxLines="1"
         android:ellipsize="end" android:maxWidth="160dp"/>
 
     <ImageButton android:id="@+id/btn_chip_del"
@@ -18,5 +18,5 @@
         android:scaleType="fitCenter"
         android:src="@android:drawable/ic_menu_close_clear_cancel"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:tint="#90A4AE"/>
+        android:tint="@color/glass_text_secondary"/>
 </LinearLayout>
